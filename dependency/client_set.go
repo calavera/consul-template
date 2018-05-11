@@ -25,8 +25,9 @@ type ClientSet struct {
 
 // consulClient is a wrapper around a real Consul API client.
 type consulClient struct {
-	client    *consulapi.Client
-	transport *http.Transport
+	client     *consulapi.Client
+	transport  *http.Transport
+	consistent bool
 }
 
 // vaultClient is a wrapper around a real Vault API client.
@@ -49,6 +50,7 @@ type CreateConsulClientInput struct {
 	SSLCACert    string
 	SSLCAPath    string
 	ServerName   string
+	Consistent   bool
 
 	TransportDialKeepAlive       time.Duration
 	TransportDialTimeout         time.Duration
@@ -180,8 +182,9 @@ func (c *ClientSet) CreateConsulClient(i *CreateConsulClientInput) error {
 	// Save the data on ourselves
 	c.Lock()
 	c.consul = &consulClient{
-		client:    client,
-		transport: transport,
+		client:     client,
+		transport:  transport,
+		consistent: i.Consistent,
 	}
 	c.Unlock()
 
@@ -308,6 +311,12 @@ func (c *ClientSet) Consul() *consulapi.Client {
 	c.RLock()
 	defer c.RUnlock()
 	return c.consul.client
+}
+
+func (c *ClientSet) RequireConsistentConsul() bool {
+	c.RLock()
+	defer c.RUnlock()
+	return c.consul.consistent
 }
 
 // Vault returns the Vault client for this set.

@@ -23,6 +23,9 @@ type ConsulConfig struct {
 
 	// Transport configures the low-level network connection details.
 	Transport *TransportConfig `mapstructure:"transport"`
+
+	// Consistent configures consul-template to always execute queries in consistent mode.
+	Consistent *bool `mapstructure:"consistent"`
 }
 
 // DefaultConsulConfig returns a configuration that is populated with the
@@ -63,6 +66,8 @@ func (c *ConsulConfig) Copy() *ConsulConfig {
 	if c.Transport != nil {
 		o.Transport = c.Transport.Copy()
 	}
+
+	o.Consistent = c.Consistent
 
 	return &o
 }
@@ -109,6 +114,10 @@ func (c *ConsulConfig) Merge(o *ConsulConfig) *ConsulConfig {
 		r.Transport = r.Transport.Merge(o.Transport)
 	}
 
+	if o.Consistent != nil {
+		r.Consistent = o.Consistent
+	}
+
 	return r
 }
 
@@ -146,6 +155,12 @@ func (c *ConsulConfig) Finalize() {
 		c.Transport = DefaultTransportConfig()
 	}
 	c.Transport.Finalize()
+
+	if c.Consistent == nil {
+		c.Consistent = boolFromEnv([]string{
+			"CONSUL_CONSISTENT",
+		}, false)
+	}
 }
 
 // GoString defines the printable version of this struct.
@@ -161,6 +176,7 @@ func (c *ConsulConfig) GoString() string {
 		"SSL:%#v, "+
 		"Token:%t, "+
 		"Transport:%#v"+
+		"Consistent:%t, "+
 		"}",
 		StringGoString(c.Address),
 		c.Auth,
@@ -168,5 +184,6 @@ func (c *ConsulConfig) GoString() string {
 		c.SSL,
 		StringPresent(c.Token),
 		c.Transport,
+		BoolPresent(c.Consistent),
 	)
 }

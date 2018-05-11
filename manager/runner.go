@@ -1216,6 +1216,7 @@ func newClientSet(c *config.Config) (*dep.ClientSet, error) {
 		TransportMaxIdleConns:        config.IntVal(c.Consul.Transport.MaxIdleConns),
 		TransportMaxIdleConnsPerHost: config.IntVal(c.Consul.Transport.MaxIdleConnsPerHost),
 		TransportTLSHandshakeTimeout: config.TimeDurationVal(c.Consul.Transport.TLSHandshakeTimeout),
+		Consistent:                   config.BoolVal(c.Consul.Consistent),
 	}); err != nil {
 		return nil, fmt.Errorf("runner: %s", err)
 	}

@@ -208,10 +208,11 @@ func (v *View) fetch(doneCh, successCh chan<- struct{}, errCh chan<- error) {
 		}
 
 		data, rm, err := v.dependency.Fetch(v.clients, &dep.QueryOptions{
-			AllowStale: allowStale,
-			WaitTime:   defaultWaitTime,
-			WaitIndex:  v.lastIndex,
-			VaultGrace: v.vaultGrace,
+			AllowStale:        allowStale,
+			WaitTime:          defaultWaitTime,
+			WaitIndex:         v.lastIndex,
+			VaultGrace:        v.vaultGrace,
+			RequireConsistent: v.clients.RequireConsistentConsul(),
 		})
 		if err != nil {
 			if err == dep.ErrStopped {
